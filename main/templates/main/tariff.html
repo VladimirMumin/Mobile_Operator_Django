@@ -1,0 +1,189 @@
+{% extends 'main/base.html' %}
+{% block title %}Тариф{% endblock %}
+
+{% block hero %}
+<section id="hero2">
+<br><br><center> <h1>Оформление SIM-карты</h1> </center>
+<a href="#hero" class="btn-primary_tariff">Посмотреть тарифы</a>
+
+<div class="container mt-2">
+  <div class="row">
+    <div class="col-md-3"></div>
+
+    <div class="col-md-6">
+      {% for message in messages %}
+      <div
+        class="alert alert-{{message.tags}} alert-dismissible fade show"
+        role="alert"
+      >
+        <strong></strong> {{message}}
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+      {% endfor %}
+
+      <form action="/tariff" method="post" id="enrollment-form">{% csrf_token %}
+        {% csrf_token %}
+
+        <div class="form-group">
+          <select class="form-control mt-2" id="tariff" name="tariff" required>
+            <option selected>Выбрать тариф</option>
+            {% for p in tariffs %}
+                <option value="{{p.name}}" data-price="{{p.price}}">{{p.name}}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+            <select class="form-control mt-2" id="plan" name="plan" required>
+                <option selected>Выбрать длительность</option>
+                {% for p in subscription_plans %}
+                    <option value="{{p.months}}" data-price="{{p.coefficient}}">{{p.months}} </option>
+                {% endfor %}
+            </select>
+        </div>
+
+
+
+        <div class="form-group">
+          <input type="text" class="form-control mt-2" value="" name="price" id="price" placeholder="Стоимость" readonly />
+        </div>
+        <div class="form-group">
+          <br />
+          <div class="d-grid gap-2">
+            <button class="btn btn-dark" type="submit">Оформить</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="col-md-3"></div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+  var form = document.getElementById("enrollment-form");
+    form.addEventListener("change", function () {
+      updatePrice();
+      updateTrainer();
+    });
+
+    function updatePrice() {
+        var tariffSelect = document.getElementById("tariff");
+        var planSelect = document.getElementById("plan");
+        var priceInput = document.getElementById("price");
+
+        var selectedTariff = tariffSelect.options[tariffSelect.selectedIndex];
+        var selectedPlan = planSelect.options[planSelect.selectedIndex];
+        var planCoefficient = selectedPlan.getAttribute("data-price");
+        var tariffPrice = selectedTariff.getAttribute("data-price");  // Используйте одинаковый атрибут для получения стоимости тарифа
+
+        var totalPrice = calculateTotalPrice(tariffPrice, planCoefficient);
+        var formattedPrice = isNaN(totalPrice) ? "0" : totalPrice + " Рублей";
+
+        priceInput.value = formattedPrice;
+    }
+
+
+
+    function updateTrainer() {
+      var tariffSelect = document.getElementById("tariff");
+
+      var selectedtariff = tariffSelect.options[tariffSelect.selectedIndex].value;
+
+
+
+    }
+
+    function calculateTotalPrice(tariffPrice, planPrice) {
+      // Ваш логический код для вычисления общей стоимости
+      // Например, вы можете добавить стоимость зала к стоимости плана.
+
+      // Вот пример:
+      return parseInt(tariffPrice) * parseInt(planPrice);
+    }
+  });
+</script>
+
+</section>
+
+
+<div id="miniWindow" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: grey; padding: 20px; border: 2px solid white; z-index: 999; opacity: 0; transition: opacity 0.5s ease-in-out;">
+  <h2>Теперь достаточно лишь доказать, что различные полиномы реализуют различные функции.</h2>
+  <!-- Здесь разместите более подробную информацию -->
+  <button onclick="closeMiniWindow()">Закрыть</button>
+</div>
+
+<!-- ... Ваш код ... -->
+
+<script>
+  function openMiniWindow(tariffId) {
+    // Получаем элемент мини-окна по его id
+    var miniWindow = document.getElementById('miniWindow');
+
+    // Здесь можно добавить более подробную информацию в мини-окно
+    // Например, используя innerHTML:
+    miniWindow.innerHTML = '<h2> Информация ' + tariffId + '</h2>';
+
+    // Показываем мини-окно с плавной анимацией
+    miniWindow.style.opacity = '1';
+
+    // Даем время для применения стилей перед изменением свойства opacity
+    setTimeout(function () {
+      miniWindow.style.display = 'block';
+    }, 110);
+  }
+
+  function closeMiniWindow() {
+    // Получаем элемент мини-окна по его id
+    var miniWindow = document.getElementById('miniWindow');
+
+    // Скрываем мини-окно с плавной анимацией
+    miniWindow.style.opacity = '0';
+
+    // Даем время для применения стилей перед изменением свойства display
+    setTimeout(function () {
+      miniWindow.style.display = 'none';
+    }, 500); // 0.5 секунды (значение должно быть равно времени анимации)
+  }
+</script>
+{% endblock %}
+{% block content %}
+    <!-- ======= About Section ======= -->
+    <section id="hero" class="d-flex align-items-center">
+      <div class="tariff-cards" data-aos="fade-up" data-aos-delay="50">
+      <div class="tariff-card" id="tariff-card-1">
+        <h2>Для себя</h2>
+        <p><i class="bi bi-check-circle"></i> <span class="bold-text">безлимитные</span> звонки на номера Волна связи</p>
+        <p><i class="bi bi-check-circle"></i> <span class="bold-text">200 минут</span> на другие мобильные номера домашнего региона</p>
+        <p><i class="bi bi-check-circle"></i> <span class="bold-text">10 ГБ </span> самого быстрого интернета в стране</p>
+        <p class="p1"> Стоимость: 350₽ в месяц</p>
+      </div>
+
+      <div class="tariff-card" id="tariff-card-2">
+        <h2>Тариф для модемов, роутеров и умных вещей</h2>
+        <p><i class="bi bi-check-circle"></i> <span class="bold-text">100 ГБ </span> самого быстрого интернета в стране</p>
+        <p><i class="bi bi-check-circle"></i> Доступ для модемов и роутеров</p>
+        <p><i class="bi bi-check-circle"></i> Раздача интернета на другие устройства</p>
+        <p><i class="bi bi-check-circle"></i> Бесплатная переадресация SMS</p>
+
+        <p class="p1"> Стоимость: 1 200₽ в месяц</p>
+      </div>
+
+      <div class="tariff-card" id="tariff-card-3">
+        <h2>Игровой</h2>
+        <p><i class="bi bi-check-circle"></i> <span class="bold-text">безлимитные</span> звонки на номера Волна связи</p>
+        <p><i class="bi bi-check-circle"></i> <span class="bold-text">200 минут</span> на другие мобильные номера домашнего региона</p>
+        <p><i class="bi bi-check-circle"></i> Стриминг, видео и общение <span class="bold-text">безлимитно  </span><a><img src="static/assets/img/twitch.png"></a><a><img src="static/assets/img/youtube.png"></a><a><img src="static/assets/img/vk2.png"></a></p>
+        <p><i class="bi bi-check-circle"></i> <span class="bold-text">30 ГБ </span> самого быстрого интернета в стране</p>
+        <p class="p1"> Стоимость: 1 050₽ в месяц</p>
+      </div>
+    </div>
+    </section><!-- End About Section -->
+
+{% endblock %}

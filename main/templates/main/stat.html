@@ -1,0 +1,102 @@
+{% extends 'main/base.html' %}
+{% block title %}Статистика{% endblock %}
+{% block content %}
+<br><center><h1>Отчётные данные</h1></center><br><br>
+    <div style="position: relative;">
+        <!-- Надпись слева от диаграммы тарифов -->
+        <div style="position: absolute; left: 10%; top: 30%; transform: translateY(-50%); white-space: nowrap;">
+            <p>Статистика по типам тарифов</p>
+        </div>
+
+        <!-- Диаграмма тарифов -->
+        <canvas id="tariffChart" width="300" height="300"></canvas>
+    </div>
+
+    <div style="position: relative; margin-top: 50px;">
+        <!-- Надпись слева от диаграммы товаров -->
+        <div style="position: absolute; left: 10%; top: 80%; transform: translateY(-50%); white-space: nowrap;">
+            <p>Статистика по купленным товарам</p>
+        </div>
+
+        <!-- Диаграмма товаров -->
+        <canvas id="productChart" width="300" height="300"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Получаем контекст для диаграммы тарифов
+            var tariffCtx = document.getElementById('tariffChart').getContext('2d');
+
+            // Получаем контекст для диаграммы товаров
+            var productCtx = document.getElementById('productChart').getContext('2d');
+
+            // Используем AJAX для получения данных о статистике тарифов
+            fetch('/tariff_statistics/')
+                .then(response => response.json())
+                .then(data => {
+                    var tariffLabels = data.labels;
+                    var tariffData = data.data.map(value => value === null ? "Нет тарифа" : value);
+
+                    // Проверка на наличие данных после маппинга
+                    if (tariffData.length > 0) {
+                        var tariffChart = new Chart(tariffCtx, {
+                            type: 'pie',
+                            data: {
+                                labels: tariffLabels,
+                                datasets: [{
+                                    data: tariffData,
+                                    backgroundColor: getRandomColorArray(tariffData.length),
+                                }],
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                            }
+                        });
+                    } else {
+                        // Обработка случая, когда все значения равны null
+                        console.error('Невозможно создать график тарифов. Все значения равны null.');
+                    }
+                });
+
+            // Используем AJAX для получения данных о статистике товаров
+            fetch('/product_statistics/')
+                .then(response => response.json())
+                .then(data => {
+                    var productLabels = data.labels;
+                    var productData = data.data.map(value => value === null ? "Нет товара" : value);
+
+                    // Проверка на наличие данных после маппинга
+                    if (productData.length > 0) {
+                        var productChart = new Chart(productCtx, {
+                            type: 'pie',
+                            data: {
+                                labels: productLabels,
+                                datasets: [{
+                                    data: productData,
+                                    backgroundColor: getRandomColorArray(productData.length),
+                                }],
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                            }
+                        });
+                    } else {
+                        // Обработка случая, когда все значения равны null
+                        console.error('Невозможно создать график товаров. Все значения равны null.');
+                    }
+                });
+        });
+
+        // Генерация случайных цветов
+        function getRandomColorArray(count) {
+            var colors = [];
+            for (var i = 0; i < count; i++) {
+                colors.push('#' + Math.floor(Math.random()*16777215).toString(16));
+            }
+            return colors;
+        }
+    </script>
+{% endblock %}

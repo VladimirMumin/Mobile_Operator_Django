@@ -1,0 +1,140 @@
+{% extends 'main/base.html' %}
+{% block title %}Корзина покупок{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="text-center">
+        <h1>Ваша корзина</h1>
+    </div>
+    <br><br>
+
+    {% if cart_items %}
+        <ul class="list-group">
+            {% for item in cart_items %}
+                <li class="list-group-item">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="img-fluid">
+                        </div>
+                        <div class="col-md-8">
+                            <h4>{{ item.product.name }}</h4>
+                            <p>Цена: {{ item.product.price }} руб.</p>
+                            <p>Количество: {{ item.quantity }}</p>
+                            <form id="quantityForm{{ item.product.id }}" method="POST" action="{% url 'update_quantity' item.product.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="quantity" value="{{ item.quantity }}">
+                                <p>
+                                    <button type="button" class="btn btn-sm btn-secondary" onclick="changeQuantity({{ item.product.id }}, -1)">-</button>
+                                    <button type="button" class="btn btn-sm btn-secondary" onclick="changeQuantity({{ item.product.id }}, 1)">+</button>
+                                </p>
+                            </form>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-danger" onclick="removeFromCart({{ item.product.id }})">Удалить из корзины</button>
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+        <p class="mt-3">Итоговая сумма: {{ total_price }} руб.</p>
+        <button class="btn btn-success" onclick="checkout()">Оформить заказ</button>
+    {% else %}
+        <p>Ваша корзина пуста.</p>
+    {% endif %}
+</div>
+
+<script>
+    // Функция для удаления товара из корзины
+    function removeFromCart(productId) {
+        // Отправляем AJAX-запрос на сервер для удаления товара
+        fetch(`/remove_from_cart/${productId}/`, {
+            method: 'DELETE',  // Метод DELETE для удаления
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),  // Передаем CSRF-токен
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Обновляем страницу после удаления товара
+            location.reload();
+        })
+        .catch(error => console.error('Ошибка:', error));
+    }
+
+    // Функция для перехода к оформлению заказа
+    function checkout() {
+    // Отправляем AJAX-запрос на сервер для оформления заказа
+    fetch('/checkout/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),  // Передаем CSRF-токен
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Обновляем страницу после оформления заказа
+        if (data.message === 'Заказ оформлен успешно') {
+            // You can perform additional actions after a successful order, e.g., redirecting to a thank-you page
+            alert('Заказ оформлен успешно!');
+            location.reload();
+        } else {
+            // Handle the case when the order couldn't be processed
+            alert('Ошибка при оформлении заказа. Пожалуйста, попробуйте еще раз.');
+        }
+    })
+    .catch(error => console.error('Ошибка:', error));
+}
+
+    function changeQuantity(productId, delta) {
+        // Получаем форму по идентификатору товара
+        const form = document.getElementById(`quantityForm${productId}`);
+
+        // Получаем текущее количество из скрытого поля
+        let quantity = parseInt(form.querySelector('[name="quantity"]').value);
+
+        // Изменяем количество с учетом delta
+        quantity += delta;
+
+        // Устанавливаем новое значение в скрытое поле
+        form.querySelector('[name="quantity"]').value = quantity;
+
+        // Если количество стало 0, то удаляем товар из корзины
+        if (quantity === 0) {
+            removeFromCart(productId);
+            return;
+        }
+
+        // Отправляем форму на сервер
+        fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),  // Передаем CSRF-токен
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Обновляем страницу после изменения количества товара
+            location.reload();
+        })
+        .catch(error => console.error('Ошибка:', error));
+    }
+
+    // Функция для получения CSRF-токена из cookie
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Ищем cookie по имени
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+
+{% endblock %}

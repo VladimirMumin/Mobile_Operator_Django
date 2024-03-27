@@ -1,0 +1,30 @@
+{% extends 'main/base.html' %}
+
+{% block title %}
+    Магазин
+{% endblock %}
+
+{% block content %}
+    <section id="portfolio" class="portfolio section-bg">
+        <div class="container">
+            <div class="">
+                <h1 class="">Каталог товаров<br><br></h1>
+            </div>
+
+            <div class="row portfolio-container" data-aos="fade-up" data-aos-delay="50">
+                {% for product in products %}
+                    <div class="col-lg-4 col-md-6 portfolio-item filter-web">
+                        <div class="item-content">
+                            <img src="{{ product.image }}" class="img-fluid" alt="">
+                            <h4 style="text-align: center;"><br>{{ product.name }}</h4>
+                            <p><i class="bi bi-check-circle"></i> {{ product.memory }} GB</p>
+                            <p><i class="bi bi-check-circle"></i> {{ product.color }}</p>
+                            <p>Цена: {{ product.price }} руб.</p>
+                            <a class="btn btn-primary custom-btn" href="{% url 'add_to_cart' product.id %}">Добавить в корзину</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section><!-- End Portfolio Section -->
+{% endblock %}

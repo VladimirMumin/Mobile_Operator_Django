@@ -1,0 +1,21 @@
+
+.schedule {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.schedule-entry {
+    background-color: #ffffff; /* Цвет фона прямоугольника */
+    color: #020303; /* Цвет текста внутри прямоугольника */
+    border: 1px solid #2980b9; /* Цвет границы прямоугольника */
+    border-radius: 10px; /* Радиус скругления углов */
+    padding: 10px; /* Внутренний отступ прямоугольника */
+    margin: 5px; /* Внешний отступ между прямоугольниками */
+}
+.busy-time {
+    background-color: #dddddd; /* Серый цвет фона */
+}
+.full {
+    color: blue; /* или другой цвет, который указывает на отсутствие мест */
+}
